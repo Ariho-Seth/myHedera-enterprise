@@ -1,36 +1,22 @@
 package com.openelements.hedera.base.test;
 
-import com.hedera.hashgraph.sdk.AccountId;
-import com.hedera.hashgraph.sdk.ContractId;
-import com.hedera.hashgraph.sdk.FileId;
-import com.hedera.hashgraph.sdk.Hbar;
-import com.hedera.hashgraph.sdk.PrivateKey;
-import com.hedera.hashgraph.sdk.Status;
-import com.hedera.hashgraph.sdk.TransactionId;
-import com.hedera.hashgraph.sdk.ContractFunctionResult;
+import com.hedera.hashgraph.sdk.*;
 import com.hedera.hashgraph.sdk.proto.ContractFunctionResultOrBuilder;
 import com.openelements.hedera.base.Account;
 import com.openelements.hedera.base.ContractParam;
-import com.openelements.hedera.base.protocol.AccountBalanceRequest;
-import com.openelements.hedera.base.protocol.AccountBalanceResponse;
-import com.openelements.hedera.base.protocol.AccountCreateRequest;
-import com.openelements.hedera.base.protocol.AccountCreateResult;
-import com.openelements.hedera.base.protocol.AccountDeleteRequest;
-import com.openelements.hedera.base.protocol.AccountDeleteResult;
-import com.openelements.hedera.base.protocol.ContractCallRequest;
-import com.openelements.hedera.base.protocol.ContractCallResult;
-import com.openelements.hedera.base.protocol.ContractCreateRequest;
-import com.openelements.hedera.base.protocol.ContractCreateResult;
-import com.openelements.hedera.base.protocol.ContractDeleteRequest;
-import com.openelements.hedera.base.protocol.ContractDeleteResult;
-import com.openelements.hedera.base.protocol.FileAppendRequest;
+import com.openelements.hedera.base.implementation.FileClientImpl;
+import com.openelements.hedera.base.protocol.*;
+
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.IntStream;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static com.openelements.hedera.base.protocol.TransactionRequest.DEFAULT_TRANSACTION_VALID_DURATION;
 
 public class ProtocolLayerDataCreationTests {
 
@@ -44,7 +30,7 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertDoesNotThrow(() -> AccountBalanceRequest.of(accountIdString));
         Assertions.assertDoesNotThrow(() -> AccountBalanceRequest.of(accountId));
         Assertions.assertDoesNotThrow(() -> new AccountBalanceRequest(accountId, null, null));
-        Assertions.assertThrows(NullPointerException.class, () -> AccountBalanceRequest.of((String)null));
+        Assertions.assertThrows(NullPointerException.class, () -> AccountBalanceRequest.of((String) null));
         Assertions.assertThrows(NullPointerException.class, () -> new AccountBalanceRequest(null, null, null));
     }
 
@@ -335,4 +321,50 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertThrows(IllegalArgumentException.class, () -> new FileAppendRequest(maxTransactionFee, transactionValidDuration, fileId, largeContents, fileMemo));
         Assertions.assertThrows(IllegalArgumentException.class, () -> new FileAppendRequest(maxTransactionFee, transactionValidDuration, fileId, largeContents, longFileMemo));
     }
+
+    @Test
+    void testFileCreateRequestCreation(){
+        //given
+        final Hbar maxTransactionFee = Hbar.fromTinybars(1000);
+        final  Duration transactionValidDuration = Duration.ofSeconds(10);
+        final byte[] contents= new byte[]{};
+        final byte[] largeContents = IntStream.range(0, 2050).mapToObj(i -> "a").reduce("", (a,b) -> a+b).getBytes();
+        final Instant expirationTime= null;
+        final String fileMemo = "fileMemo";
+        
+        //then
+        Assertions.assertDoesNotThrow(() -> FileCreateRequest.of(contents));
+        Assertions.assertDoesNotThrow(() -> FileCreateRequest.of(contents, expirationTime));
+        Assertions.assertDoesNotThrow(() -> new FileCreateRequest(maxTransactionFee, transactionValidDuration, contents, expirationTime,fileMemo));
+        Assertions.assertDoesNotThrow(() -> new FileCreateRequest(maxTransactionFee, transactionValidDuration, contents, null, fileMemo));
+        Assertions.assertDoesNotThrow(() -> new FileCreateRequest(maxTransactionFee, transactionValidDuration, contents, expirationTime, null));
+        Assertions.assertDoesNotThrow(() -> new FileCreateRequest(maxTransactionFee, transactionValidDuration,contents, null, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FileCreateRequest.of(largeContents));
+        Assertions.assertThrows(NullPointerException.class, () -> FileCreateRequest.of(null));
+        Assertions.assertThrows(NullPointerException.class, () -> FileCreateRequest.of(null, expirationTime));
+        Assertions.assertThrows(NullPointerException.class, () -> FileCreateRequest.of(null, null));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileCreateRequest(null, null, null, null,null));
+
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

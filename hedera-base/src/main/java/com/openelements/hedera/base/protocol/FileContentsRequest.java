@@ -6,7 +6,9 @@ import java.util.Objects;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-public record FileContentsRequest(@NonNull FileId fileId, @Nullable Hbar queryPayment, @Nullable Hbar maxQueryPayment) implements QueryRequest {
+public record FileContentsRequest(@NonNull FileId fileId,
+                                  @Nullable Hbar queryPayment,
+                                  @Nullable Hbar maxQueryPayment) implements QueryRequest {
 
     public FileContentsRequest {
         Objects.requireNonNull(fileId, "fileId must not be null");
